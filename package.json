@@ -19,6 +19,11 @@
   "dependencies": {
     "@sendgrid/mail": "^7.4.2",
     "axios": "^0.21.1",
-    "handlebars": "^4.7.6"
+    "handlebars": "^4.7.6",
+    "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "mongoose": "^5.11.13",
+    "nodemon": "^2.0.7",
+    "underscore": "^1.12.0"
   }
 }
