@@ -1,0 +1,24 @@
+{
+  "name": "rebase-utils",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krinashah0493/rebase-utils.git"
+  },
+  "author": "nimish",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/krinashah0493/rebase-utils/issues"
+  },
+  "homepage": "https://github.com/krinashah0493/rebase-utils#readme",
+  "dependencies": {
+    "@sendgrid/mail": "^7.4.2",
+    "axios": "^0.21.1",
+    "handlebars": "^4.7.6"
+  }
+}
