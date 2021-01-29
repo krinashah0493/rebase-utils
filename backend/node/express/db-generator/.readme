@@ -1,1 +1,4 @@
 
+# enter the json model in dbGenerator json first 
+#initialize the dbGenerator.json initialize function in main file 
+# once done use the getModels function to get all the models created
