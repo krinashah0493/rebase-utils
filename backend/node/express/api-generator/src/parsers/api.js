@@ -1,7 +1,8 @@
 const _ = require('underscore');
 const mongoDB = require('../database/mongodb/mongodb');
 const mongoParser = require('./mongo');
-
+const { functionParser } = require('./function');
+const dbUtil = require('../database/mongodb/utils');
 const validMethods = ['get', 'post', 'patch', 'delete'];
 const functionObj = {
     mongo: mongoParser.performMongoAction
@@ -10,10 +11,16 @@ const functionObj = {
 const executeFunctionsOfEndpoint = async (functions, reqData) => {
     const { body, params } = reqData;
     let result = null;
-    console.log(body);
+    // console.log(body);
     for(let i = 0; i < functions.length; i++){
         const currFunc = functions[i];
-        if(_.isArray(currFunc.operation)){
+        if(currFunc.type === 'customWithDB'){
+            currFunc.params.req = reqData;
+            const paramsValues = _.values(currFunc.params);
+            paramsValues.push(dbUtil);
+            const generatedFunction = await functionParser(currFunc);
+            return await generatedFunction(...paramsValues);
+        }else if(_.isArray(currFunc.operation)){
             const  operationReq = [...(result !== null && [result])];
             currFunc.operation.map(obj => {
                 if(currFunc.type === 'db'){
