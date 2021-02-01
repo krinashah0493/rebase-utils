@@ -3,8 +3,8 @@ const { initRegex } = require('./regex');
 let regExpArray;
 let authSchema;
 
-const initAuth = schemaPath => {
-    authSchema = require(schemaPath);
+const initAuth = authSchema => {
+    console.log(authSchema);
     initRegex(authSchema);
     regExpArray = require('./regex').regexArray;
 }
