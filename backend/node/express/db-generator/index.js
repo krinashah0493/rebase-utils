@@ -1,0 +1,1 @@
+exports.dbGenerator=require("./dbGenerator").initialize

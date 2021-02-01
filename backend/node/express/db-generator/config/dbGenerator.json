@@ -1,0 +1,21 @@
+{
+  "projectSchema": {
+    "type": "mongo",
+    "collection": [
+      {
+        "collection_name": "users",
+        "id": "String",
+        "password": "String",
+        "role": "String",
+        "companyId": "Array",
+        "groupId": "Array",
+        "verified": "Boolean",
+        "rewards": "String",
+        "address": "String",
+        "gender": "String",
+        "email": "String",
+        "name": "String"
+      }
+    ]
+  }
+}
