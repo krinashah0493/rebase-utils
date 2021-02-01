@@ -1,8 +1,8 @@
 "use strict";
 
-const jsonBody = require("../../config/dbGenerator.json");
+const jsonBody = require("./config/dbGenerator.json");
 const mongoose = require("mongoose");
-const devJson = require("../../config/dev.json");
+const devJson = require("./config/dev.json");
 
 let models = {};
 
@@ -26,7 +26,6 @@ const initialize = async () => {
         let modelName = `${collection.collection_name}models`;
         let collectionName = collection.collection_name;
         delete collection.collection_name;
-        console.log(collectionName, collection, modelName);
 
         models[modelName] = mongoose.model(
           collectionName,
