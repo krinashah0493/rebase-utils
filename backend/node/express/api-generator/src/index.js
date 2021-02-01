@@ -2,11 +2,11 @@
 
 const express = require('express');
 const app = express();
-const { apis } = require('./apiModels/apis');
+// const { apis } = require('./apiModels/apis');
 const { routeMapper } = require('./parsers/api');
-
+// const linkHasher = require('./apiModels/link-hasher');
 app.use(express.json());
-
+linkHasher.initEncoderSchema();
 module.exports = { routeMapper };
 // routeMapper(apis, app);
 
