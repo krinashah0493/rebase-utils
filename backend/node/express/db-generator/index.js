@@ -1,1 +1,2 @@
-exports.dbGenerator=require("./dbGenerator").initialize
+exports.initialize=require("./dbGenerator").initialize
+exports.models=require("./dbGenerator").getModel
