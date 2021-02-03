@@ -3,12 +3,8 @@ const RegexApiEndpoints = require('./regex');
 class Authentication {
     constructor(authSchema) {
         this.authSchema = authSchema;
-    }
-
-    initAuth = () => {
         const regex = new RegexApiEndpoints(this.authSchema);
         this.regExpArray = regex.getRegExpArray();
-        console.log(this.regExpArray);
     }
 
     isAuthenticated = (req, res, next) => {
