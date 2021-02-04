@@ -1,1 +1,182 @@
 
+# enter the json model in dbGenerator json first 
+#initialize the dbGenerator.json initialize function in main file 
+# once done use the getModels function to get all the models created
+
+#example json body with validations and fields for backEnd and frontEnd
+
+{
+  "projectSchema": {
+    "type": "mongo",
+    "collection": [
+      {
+        "collection_name": "users",
+        "id": {
+          "frontEnd":{
+            "type":"String",
+            "required":true
+          },
+          "backEnd":{
+            "required":true,
+            "type":"String"
+          }
+        },
+        "password": {
+          "frontEnd":{
+            "type":"String",
+            "min":6,
+            "required":[true,"Please enter a value"],
+            "form":{
+              "placeholder":"Enter password",
+              "tooltip":"Please Enter a password"
+            }
+          },
+          "backEnd":{
+            "type":"String",
+            "minLength":[6,"Password must be gretaer than 6 characters"],
+            "required":true
+          }
+        },
+        "role": {
+          "backEnd":{
+          "type":"String",
+          "enum":["admin","employee"],
+          "required":true
+          },
+          "frontEnd":{
+            "type":"String",
+            "enum":["admin","employee"],
+            "required":[true,"Role is required"],
+            "form":{
+              "placeholder":"Enter Role of the user",
+              "tooltip":"Please Enter a role"
+            }
+            }
+        },
+        "companyId": {
+          "backEnd":{
+            "required":true,
+          "type":["String"]
+          },
+          "frontEnd":{
+            "required":true,
+          "type":["String"],
+          "form":{
+            "placeholder":"Enter companyIds",
+            "tooltip":"Please Enter a password",
+          },
+          "displayToUser":true
+          }
+        },
+        "groupId": {
+          "backEnd":{
+            "required":true,
+          "type":["String"]
+          },
+          "frontEnd":{
+            "required":true,
+            "type":"String",
+            "form":{
+              "placeholder":"Enter groupId",
+              "tooltip":"Please Enter a password"
+            },
+          "displayToUser":true
+          }
+        },
+        "verified": {
+          "backEnd":{
+          "type":"Boolean",
+          "required":true
+          }
+        },
+        "rewards": {
+          "frontEnd":{
+          "type":"String",
+            "required":true,
+            "form":{
+              "placeholder":"Enter password",
+              "tooltip":"Please Enter a password"
+            },
+                    "displayToUser":true
+
+          },
+          "backEnd":{
+          "type":"String",
+            "required":true,
+          }
+        },
+        "address": {
+          "backEnd":{
+            "type":"String"
+          },
+          "frontEnd":{
+            "type":"String",
+            "form":{
+              "placeholder":"Enter password",
+              "tooltip":"Please Enter a password"
+            },
+          "displayToUser":true
+
+            
+          }
+        },
+        "gender": {
+          "frontEnd":{
+            "required": [true, "Please select a gender"],
+            "type": "String",
+          "enum": {
+            "values":["Male", "Female", "Neutral"],
+            "message":"Gender is either male,female or neutral"
+          },
+          "form":{
+            "placeholder":"Enter Gender",
+            "tooltip":"Please Select a gender"
+          }
+          },
+          "backEnd":{
+            "required":true,
+            "type": "String",
+            "enum": {
+              "values":["Male", "Female", "Neutral"],
+              "message":"Gender is either male,female or neutral"
+            },
+            "trim":true
+          }
+        },
+        "email": {
+        "backEnd":{
+          "type":"String",
+          "required":true,
+          "unique":true,
+          
+        },
+        "frontEnd":{
+          "type":"String",
+          "required":true,
+          "unique":true,
+          "form":{
+            "placeholder":"Enter a email",
+            "tooltip":"Please Enter a unique emailId"
+          },
+          "displayToUser":true
+        }
+      },
+        "name": {
+          "backEnd":{
+          "type":"String",
+            "required":true
+          },
+          "frontEnd":{
+          "type":"String",
+            "required":[true,"Please Enter a name"],
+            "form":{
+              "placeholder":"Enter name",
+              "tooltip":"Please Enter a name"
+            },
+          "displayToUser":true
+          }
+        }
+      }
+    ]
+  }
+}
