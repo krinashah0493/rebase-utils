@@ -1,0 +1,170 @@
+{
+    "db": {
+        "mongo": {
+            "uri": "mongodb://localhost:27017",
+            "name": "wf_transactionDB",
+            "models": "mongoModels"
+        }
+    },
+    "endpoints": [
+        {
+            "base": "/livecheck",
+            "routes": [
+                {
+                    "path": "/",
+                    "methods": {
+                        "get": {}
+                    }
+                }
+            ]
+        },
+        {
+            "base": "/v1/invoices",
+            "routes": [
+                {
+                    "path": "/",
+                    "methods": {
+                        "post": [
+                            {
+                                "id": 0,
+                                "use": "apiReqBody",
+                                "add": {
+                                    "id": "",
+                                    "storeId": ""
+                                }
+                            },
+                            {
+                                "id": 1,
+                                "actions": [
+                                    {
+                                        "operation": "generateId",
+                                        "modify": "id"
+                                    },
+                                    {
+                                        "operation": "getSubString",
+                                        "modify": "storeId",
+                                        "indexes": {
+                                            "from": 2,
+                                            "to": 3
+                                        },
+                                        "use": "billNo"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 2,
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "get",
+                                        "modelName": "shopinfos",
+                                        "query": "id",
+                                        "use": "storeId"
+                                    },
+                                    "saveAt": "storesResult"
+                                }
+                            },
+                            {
+                                "id": 3,
+                                "condition": "isStorePresent",
+                                "message": "Store does not exist"
+                            },
+                            {
+                                "id": 4,
+                                "remove": [
+                                    "storesResult"
+                                ]
+                            },
+                            {
+                                "id": 5,
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "upsert",
+                                        "modelName": "transactions"
+                                    },
+                                    "saveAt": "transactionData"
+                                }
+                            },
+                            {
+                                "id": 6,
+                                "actions": {
+                                    "operation": "getMongoObjectIdAsString",
+                                    "use": "transactionData",
+                                    "saveAt": "mongoId"
+                                }
+                            },
+                            {
+                                "id": 7,
+                                "actions": {
+                                    "operation": "custom",
+                                    "customFunction": "encodeId",
+                                    "saveAt": "encodedId"
+                                }
+                            },
+                            {
+                                "id": 8,
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "upsert",
+                                        "modelName": "transactions",
+                                        "use": "encodedId",
+                                        "on": "id"
+                                    }
+                                }
+                            },
+                            {
+                                "id": 9,
+                                "remove": [
+                                    "transactionData",
+                                    "mongoId"
+                                ],
+                                "actions": [
+                                    {
+                                        "customFunction": "createUserObject",
+                                        "saveAt": "user"
+                                    },
+                                    {
+                                        "customFunction": "createPaymentObject",
+                                        "saveAt": "payment"
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 10,
+                                "actions": [
+                                    {
+                                        "operation": "mongo",
+                                        "values": {
+                                            "type": "upsert",
+                                            "modelName": "users",
+                                            "use": "user"
+                                        }
+                                    },
+                                    {
+                                        "operation": "mongo",
+                                        "values": {
+                                            "type": "upsert",
+                                            "modelName": "paymentinfos",
+                                            "use": "payment"
+                                        }
+                                    }
+                                ]
+                            },
+                            {
+                                "id": 11,
+                                "remove": [
+                                    "payment",
+                                    "user",
+                                    "encodedId"
+                                ],
+                                "value": "Transaction created"
+                            }
+                        ]
+                    }
+                }
+            ]
+        }
+    ]
+}
