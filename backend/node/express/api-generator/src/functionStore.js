@@ -29,10 +29,13 @@ const removeObjectKeys = (dataObj, keys) => {
     return __.omit(dataObj, keys);
 }
 
+const isObject = (val) => val && val.constructor && val.constructor.name === 'Object';
+
 module.exports = {
     generateId,
     getSubString,
     getMongoObjectIdAsString,
     updateData,
     removeObjectKeys,
+    isObject,
 };
