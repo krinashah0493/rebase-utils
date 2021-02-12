@@ -54,11 +54,14 @@ const executeFunctionsOfEndpoint = async (functions, reqData) => {
 }
 
 const returnDataForOperations = (type = '', reqData, currentData) => {
+
     switch(type){
         case 'apiReqBody':
             return reqData.body;
-        case 'apiReqParams':
+        case 'apiReqQuery':
             return reqData.query;
+        case 'apiReqParams':
+            return reqData.params.id;
         default:
             return currentData;
     }
@@ -71,7 +74,6 @@ const returnUserActionResult = (type, data, customFunctionObject) => {
 }
 
 const executeUserActions = async (actions, result, customFunctionObject) => {
-    console.log(actions);
     if(actions && Array.isArray(actions) && actions.length > 0){
         const parallelOperations = __.map(actions, (action) => returnUserActionResult(action.operation, {resultObj: result, action}, customFunctionObject));
         const parallelOperationsResult = await Promise.all(parallelOperations);
@@ -82,14 +84,16 @@ const executeUserActions = async (actions, result, customFunctionObject) => {
             action.saveAt && await customFunctionObject['updateData'](action.saveAt, result, parallelOperationsResult[j]);
         }
     }else if(actions && !_.isEmpty(actions)){
-        console.log(actions);
         const value = await returnUserActionResult(actions.operation, {resultObj: result, action: actions}, customFunctionObject);
-        actions.modify && await customFunctionObject['updateData'](actions.modify, result, value);
-        actions.saveAt && await customFunctionObject['updateData'](actions.saveAt, result, value);
+        actions.modify && customFunctionObject['updateData'](actions.modify, result, value);
+        actions.saveAt && customFunctionObject['updateData'](actions.saveAt, result, value);
+        return value;
+    }else{
+        return result;
     }
 }
 
-const performOperations = async (tasks, reqData, customFunctionObject) => {
+const performOperations = async (methodKey, tasks, reqData, customFunctionObject) => {
     let result = {};
     for(let i=0; i<tasks.length; i++){
         result = returnDataForOperations(tasks[i].use, reqData, result);
@@ -99,10 +103,14 @@ const performOperations = async (tasks, reqData, customFunctionObject) => {
         }else if(tasks[i].remove){
             result = customFunctionObject['removeObjectKeys'](result, tasks[i].remove);
         }
-        if('condition' in tasks[i] && !(customFunctionObject['isStorePresent'](result))){
+        if('condition' in tasks[i] && !(customFunctionObject[tasks[i].condition](result))){
             return tasks[i].message || result;
         }else{
-            await executeUserActions(actions, result, customFunctionObject);
+            if(methodKey === 'get'){
+                result = await executeUserActions(actions, result, customFunctionObject);
+            }else{
+                await executeUserActions(actions, result, customFunctionObject);
+            }
             if(tasks[i].value){
                 result = tasks[i].value;
             }
@@ -116,7 +124,7 @@ const generateEndpoint = (apps, methodKey, base, path, functions, tasks, customF
         try{
             let data = null;
             if(tasks && tasks.length > 0){
-                data = await performOperations(tasks, req, customFunctionObject);
+                data = await performOperations(methodKey, tasks, req, customFunctionObject);
             }
             // if(functions && functions.length > 0){
             //     data = await executeFunctionsOfEndpoint(functions, req);

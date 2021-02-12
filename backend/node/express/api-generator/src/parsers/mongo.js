@@ -1,6 +1,7 @@
 'use strict';
 const dbUtil = require('../database/mongodb/utils');
 const __ = require('lodash');
+const {isObject} = require('../functionStore');
 
 const performMongoAction = async (dbValue) => {
     try{
@@ -8,11 +9,12 @@ const performMongoAction = async (dbValue) => {
             case 'get':
                 // console.log('DB mongo get: ', dbValue);
                 const getResult = await dbUtil.getAllByFilter(dbValue.modelName, dbValue.query || {});
+                console.log(getResult);
                 return getResult;
                 
             case 'upsert':
                 // console.log('DB mongo upsert: ', dbValue);
-                const upsertResult = await dbUtil.upsertDatabase(dbValue.modelName, dbValue.data.id, dbValue.data.value, dbValue.query || null);
+                const upsertResult = await dbUtil.upsertDatabase(dbValue.modelName, dbValue.data.id || null, dbValue.data.value, dbValue.query || null);
                 return upsertResult;
             
             case 'delete':
@@ -36,13 +38,15 @@ const mongoWrapperFunction = (data) => {
     let query = {};
     let dbData = null;
     const mongoData = data.action.values;
-    if(mongoData.query && mongoData.use){
-        query[mongoData.query] = __.get(data.resultObj, mongoData.use);
+    if(mongoData.query){
+        query[mongoData.query] = isObject(data.resultObj) ? __.get(data.resultObj, mongoData.use) : data.resultObj;
     }
     if(mongoData.on && mongoData.use){
         dbData = {id: __.get(data.resultObj, mongoData.on), value: __.get(data.resultObj, mongoData.use)};
-    }else if(mongoData.use){
+    }else if(mongoData.use && !mongoData.query){
         dbData = {id: __.get(data.resultObj, 'id'), value: __.get(data.resultObj, mongoData.use)};
+    }else if(mongoData.use && mongoData.query){
+        dbData = {value: data.resultObj}
     }else{
         dbData = {id: __.get(data.resultObj, 'id'), value: data.resultObj};
     }
