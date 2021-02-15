@@ -3,6 +3,7 @@
 const mongoose = require("mongoose");
 const devJson = require("");
 const parser=require("./parser")
+const config=require("config")
 
 let models = {};
 const user = config.get("user");
