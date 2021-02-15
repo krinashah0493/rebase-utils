@@ -3,58 +3,11 @@ const _ = require('underscore');
 const __ = require('lodash');
 const mongoDB = require('../database/mongodb/mongodb');
 const mongoParser = require('./mongo');
-const { functionParser } = require('./function');
-const dbUtil = require('../database/mongodb/utils');
 const functionUtils = require('../functionStore');
 const validMethods = ['get', 'post', 'patch', 'delete'];
 
-const functionObj = {
-    mongo: mongoParser.performMongoAction
-};
-
-const executeFunctionsOfEndpoint = async (functions, reqData) => {
-    const { body, params } = reqData;
-    let result = null;
-    // console.log(body);
-    for(let i = 0; i < functions.length; i++){
-        const currFunc = functions[i];
-        if(currFunc.type === 'customWithDB'){
-            currFunc.params.req = reqData;
-            const paramsValues = _.values(currFunc.params);
-            paramsValues.push(dbUtil);
-            const generatedFunction = await functionParser(currFunc);
-            return await generatedFunction(...paramsValues);
-        }else if(_.isArray(currFunc.operation)){
-            const  operationReq = [...(result !== null && [result])];
-            currFunc.operation.map(obj => {
-                if(currFunc.type === 'db'){
-                    if(obj.query === 'prev') obj.query = result;
-                    else if(obj.data === 'req') obj.data = body;
-                    else if(obj.query === 'params') obj.query = params;
-                    operationReq.push(functionObj[currFunc[currFunc.type]](obj));
-                }else{
-                    operationReq.push(obj());
-                }       
-            });
-            result = await Promise.all(operationReq);
-        }else{
-            if(currFunc.type === 'db'){
-                const obj = {...currFunc.operation};
-                if(obj.query === 'prev') obj.query = result;
-                else if(obj.data === 'req') obj.data = body;
-                else if(obj.query === 'params') obj.query = params;
-                result = await functionObj[currFunc[currFunc.type]](obj);
-            }else{
-                result = currFunc.operation(result);
-            }
-        }
-        
-    }
-    return result;
-}
-
+// Responsible to return data which will be used in further function operations
 const returnDataForOperations = (type = '', reqData, currentData) => {
-
     switch(type){
         case 'apiReqBody':
             return reqData.body;
@@ -67,19 +20,24 @@ const returnDataForOperations = (type = '', reqData, currentData) => {
     }
 };
 
+// Responsible to select and return a function based on data and key type for ongoing operation
 const returnUserActionResult = (type, data, customFunctionObject) => {
     const inputData = data.action.customFunction ? data.resultObj : data;
     const keyType = data.action.customFunction ? data.action.customFunction : type;
     return customFunctionObject[keyType](inputData);
 }
 
+/**
+ * This function responsiblity to perform either single or parallel function execution.
+ * If actions is an array then its a parallel else it will be single
+ * If user provided modify or saveAt key then this will overwrite result to those provided keys
+ */
 const executeUserActions = async (actions, result, customFunctionObject) => {
     if(actions && Array.isArray(actions) && actions.length > 0){
         const parallelOperations = __.map(actions, (action) => returnUserActionResult(action.operation, {resultObj: result, action}, customFunctionObject));
         const parallelOperationsResult = await Promise.all(parallelOperations);
         for(let j=0; j<actions.length; j++){
             const action = actions[j];
-            // const value = await returnUserActionResult(action.operation, {resultObj: result, action});
             action.modify && await customFunctionObject['updateData'](action.modify, result, parallelOperationsResult[j]);
             action.saveAt && await customFunctionObject['updateData'](action.saveAt, result, parallelOperationsResult[j]);
         }
@@ -93,6 +51,15 @@ const executeUserActions = async (actions, result, customFunctionObject) => {
     }
 }
 
+/**
+ * This function maps to get, post, patch, delete array value from json and return result.
+ * Calls returnDataForOperations() to get intial result to perform further operations.
+ * Checks if add key is available or not so that it can add keys to existing data.
+ * Checks if remove key exist so that it can remove keys from existing object data.
+ * If condition key is present in operation and if its true then it will perform further 
+ * operation or it will return false or error message provided by user.
+ * Checks for value key if it exist then it will return that else by default it will return the operational data.
+ */
 const performOperations = async (methodKey, tasks, reqData, customFunctionObject) => {
     let result = {};
     for(let i=0; i<tasks.length; i++){
@@ -119,16 +86,17 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
     return result;
 };
 
-const generateEndpoint = (apps, methodKey, base, path, functions, tasks, customFunctionObject) => {
+/**
+ * This function responsibility to generate endpoints by using methodkey which consist of names like get, post, patch, delete
+ * and uses the express app provided to it, path of endpoint and customFunctionObject which has generic and custom function
+ */
+const generateEndpoint = (apps, methodKey, base, path, tasks, customFunctionObject) => {
     return apps[methodKey](base+path, async(req, res) => {
         try{
             let data = null;
             if(tasks && tasks.length > 0){
                 data = await performOperations(methodKey, tasks, req, customFunctionObject);
             }
-            // if(functions && functions.length > 0){
-            //     data = await executeFunctionsOfEndpoint(functions, req);
-            // }
             res.status(200).json({success: true, data});
         }catch(err){
             console.log({[base+path]: err});
@@ -137,6 +105,10 @@ const generateEndpoint = (apps, methodKey, base, path, functions, tasks, customF
     });
 }
 
+/**
+ * This is root level function which initializes mongo and merges and return generic functions and custom user function
+ * for further operations and it maps over to the methods and checks if its valid method name or not.
+ */
 const routeMapper = (jsonData, apps, customObject) => {
     if(!_.isEmpty(jsonData.db) && jsonData.db.mongo && !_.isEmpty(jsonData.db.mongo)){
         jsonData.db.mongo.models = customObject[jsonData.db.mongo.models];
@@ -153,9 +125,8 @@ const routeMapper = (jsonData, apps, customObject) => {
         routes.map(route => {
             const { path, methods } = route;
             _.map(methods, (method, methodKey) => {
-                const { functions } = method;
                 if(validMethods.includes(methodKey)){
-                    generateEndpoint(apps, methodKey, base, path, functions, method, functionsObj);
+                    generateEndpoint(apps, methodKey, base, path, method, functionsObj);
                 }else{
                     console.log({error: `Check method value of enpoint "${base+path}"`});
                     return;
