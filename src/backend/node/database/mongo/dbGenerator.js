@@ -11,6 +11,7 @@ const port = config.get("port");
 const password = encodeURIComponent(config.get("password"));
 const databaseName = config.get("databaseName");
 const host = config.get("host");
+const uri=config.get("uri")
 
 const getModel = () => models;
 const initialize = async (jsonBody) => {
@@ -20,14 +21,28 @@ const initialize = async (jsonBody) => {
   }
   const typeOfDB = jsonBody.projectSchema.type;
   if (typeOfDB === "mongo") {
-    const response = await mongoose.connect(
-      `mongodb://${user}:${password}@${host}:${port}/${databaseName}`,
-      {
-        useUnifiedTopology: true,
-        useNewUrlParser: true,
-        useCreateIndex: true,
-      }
-    );
+    if(user && password && host && port){
+      await mongoose.connect(
+        `mongodb://${user}:${password}@${host}:${port}/${databaseName}`,
+        {
+          useUnifiedTopology: true,
+          useNewUrlParser: true,
+          useCreateIndex: true,
+        }
+      );
+    }else if(!user || !password || !host || !port){
+       await mongoose.connect(
+        `${uri}/${databaseName}`,
+        {
+          useUnifiedTopology: true,
+          useNewUrlParser: true,
+          useCreateIndex: true,
+        }
+      );
+    }else{
+      return "Create a  config file with proper credentials and paramters"
+    }
+    
     const collections = [parser(jsonBody.projectSchema.collection)];
     collections.forEach((collection) => {
       if (collection.collection_name) {
