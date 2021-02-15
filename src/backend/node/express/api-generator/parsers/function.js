@@ -1,14 +1,22 @@
+// This file currently not in use kept for reference
+
 const _ = require('underscore');
 function insert(str, index, value) {
     return str.substr(0, index) + value + str.substr(index);
 }
 
+// Consist of js string for db
 const dbObj = {
     mongo:{
         get: "await dbUtil.getAllByFilter(modelName, query || {})",
         upsert: "await dbUtil.upsertDatabase(modelName, upsertDBId, upsertDBBody)",
     }
 }
+
+/**
+ * Generates a function by taking user function as string and replace keywords with double quotes to js string
+ * and creates a function by creating anonymous function.
+ */
 
 const functionParser = async (dataObj) => {
     let stringFunc = dataObj.func.toString();

@@ -1,14 +1,9 @@
+// REFERENCE FILE
 const mongoModels = require('../database/mongodb/models');
 const linkHasher = require('./link-hasher');
 const moment = require('moment');
 const operation = () => {
     return {name: 'xyz'};
-}
-
-const operationTwo = (data) => {
-    console.log('here',data);
-    const result = data[0];
-    return data;
 }
 
 const isStorePresent = (result) => {
@@ -42,35 +37,7 @@ const createPaymentObject = (result) => {
         paymentMode: 'Offline'
     };
 }
-/*
-data: req, custom
-modify existing data before or after execution
-inbuilt functions
-use previous data or any specific data
-*/
-const invoicesOperations = [
-    { id: 0, use: 'apiReqBody', add: { id: '', storeId: '' } },
-    { id: 1, actions: [
-        { operation: 'generateId', modify: 'id' },
-        { operation: 'getSubString', modify: 'storeId', indexes: {from: 2, to: 3}, use: 'billNo' },
-    ] },
-    { id: 2, actions: { operation: 'mongo', values: { type: 'get', modelName: 'shopinfos', query: 'id', use: 'storeId' }, saveAt: 'storesResult' } },
-    { id: 3, condition: isStorePresent, message: 'Store does not exist' },//custom function needed
-    { id: 4, remove: ['storesResult'] },
-    { id: 5, actions: { operation: 'mongo', values: { type: 'upsert', modelName: 'transactions' }, saveAt: 'transactionData' } },
-    { id: 6, actions: { operation: 'getMongoObjectIdAsString', use: 'transactionData', saveAt: 'mongoId' } },
-    { id: 7, actions: { operation: 'custom', customFunction: encodeId, saveAt: 'encodedId' } },
-    { id: 8, actions: { operation: 'mongo', values: { type: 'upsert', modelName: 'transactions', use: 'encodedId', on: 'id' } } },
-    { id: 9, remove: ['transactionData', 'mongoId'], actions: [
-        { customFunction: createUserObject, saveAt: 'user'},
-        { customFunction: createPaymentObject, saveAt: 'payment'}
-    ]},
-    { id: 10, actions: [
-        { operation: 'mongo', values: { type: 'upsert', modelName: 'users', use: 'user' } },
-        { operation: 'mongo', values: { type: 'upsert', modelName: 'paymentinfos', use: 'payment' } }
-    ]},
-    { id: 11, remove: ['payment', 'user', 'encodedId'], value: 'Transaction created' }
-];
+
 let stringFunc = async () => {
     console.log(req.body);
     let body = req.body;
@@ -126,14 +93,6 @@ let stringFunc = async () => {
     }
 }
 
-// const test1 = () => new Promise(resolve => setTimeout(() => resolve('test1'), 500));
-// const test2 = () => new Promise(resolve => setTimeout(() => resolve('test2'), 400));
-// const test3 = () => new Promise(resolve => setTimeout(() => resolve('test3'), 300));
-
-const test1 = () => 'test1';
-const test2 = () => 'test2';
-const test3 = () => 'test3';
-
 const apis = {
     db: {
         mongo: {
@@ -150,17 +109,6 @@ const apis = {
                     path: '/',
                     methods: {
                         get: {}
-                    }
-                }
-            ]
-        },
-        {
-            base: '/v1/invoices',
-            routes: [
-                {
-                    path: '/',
-                    methods: {
-                        post: invoicesOperations
                     }
                 }
             ]
@@ -207,41 +155,6 @@ const apis = {
                                 }
                             ]
                         }
-                    }
-                }
-            ]
-        },
-        {
-            base: '/v1/user',
-            routes: [
-                {
-                    path: '/',
-                    methods: {
-                        get: {
-                            functions: [
-                                // {
-                                //     type: 'db',
-                                //     db: 'mongo',
-                                //     operation: [
-                                //         {type: 'get', modelName: 'Users', query: {id: 131}},
-                                //         {type: 'get', modelName: 'Users', query: {id: 132}},
-                                //         {type: 'get', modelName: 'Users', query: {id: 133}},
-                                //     ]
-                                // },
-                                {
-                                    type: 'custom',
-                                    operation: [
-                                        test1,
-                                        test2,
-                                        test3
-                                    ]
-                                },
-                                {
-                                    type: 'custom',
-                                    operation: operationTwo
-                                }
-                            ]
-                        },
                     }
                 }
             ]

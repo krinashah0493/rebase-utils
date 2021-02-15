@@ -3,6 +3,7 @@ const dbUtil = require('../database/mongodb/utils');
 const __ = require('lodash');
 const {isObject} = require('../functionStore');
 
+// Perform mongo db operation based on get, upsert and delete keywords
 const performMongoAction = async (dbValue) => {
     try{
         switch(dbValue.type){
@@ -34,6 +35,7 @@ const performMongoAction = async (dbValue) => {
     }
 }
 
+// This is a wrapper function for mongo which passes the valid values to mongo functions to get result
 const mongoWrapperFunction = (data) => {
     let query = {};
     let dbData = null;
