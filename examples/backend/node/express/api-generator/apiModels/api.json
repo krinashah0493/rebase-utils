@@ -2,8 +2,180 @@
     "db": {
         "mongo": {
             "uri": "mongodb://localhost:27017",
-            "name": "wf_transactionDB",
-            "models": "mongoModels"
+            "name": "cimDB",
+            "models": [
+                {
+                    "collection_name": "users",
+                    "user_id": {
+                        "backEnd": {
+                            "required": true,
+                            "type": "String"
+                        }
+                    },
+                    "user_name": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "backEnd": {
+                            "required": true,
+                            "type": "String"
+                        }
+                    },
+                    "phone_number": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        }
+                    },
+                    "otp_verified": {
+                        "backEnd": {
+                            "type": "Boolean"
+                        }
+                    },
+                    "subscription_id": {
+                        "backEnd": {
+                            "type": "String"
+                        }
+                    },
+                    "payment_paid": {
+                        "backEnd": {
+                            "type": "Boolean"
+                        }
+                    },
+                    "bill_id": {
+                        "backEnd": {
+                            "type": "String"
+                        }
+                    },
+                    "email_verified": {
+                        "backEnd": {
+                            "type": "Boolean"
+                        }
+                    },
+                    "company_name": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        }
+                    },
+                    "user_country": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        }
+                    },
+                    "user_currency_code": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        }
+                    },
+                    "address_line1": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        }
+                    },
+                    "address_line2": {
+                        "frontEnd": {
+                            "type": "String",
+                            "required": false
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "required": false
+                        }
+                    },
+                    "subscription_start_date": {
+                        "backEnd": {
+                            "type": "Date"
+                        }
+                    },
+                    "subscription_end_date": {
+                        "backEnd": {
+                            "type": "Date"
+                        }
+                    },
+                    "password": {
+                        "frontEnd": {
+                            "type": "String",
+                            "min": 6,
+                            "required": [
+                                true,
+                                "Please enter a value"
+                            ],
+                            "form": {
+                                "placeholder": "Enter password",
+                                "tooltip": "Please Enter a password"
+                            }
+                        },
+                        "backEnd": {
+                            "type": "String",
+                            "minLength": [
+                                6,
+                                "Password must be gretaer than 6 characters"
+                            ],
+                            "required": true
+                        }
+                    },
+                    "email_id": {
+                        "backEnd": {
+                            "type": "String",
+                            "required": true,
+                            "unique": true
+                        },
+                        "frontEnd": {
+                            "type": "String",
+                            "required": true,
+                            "unique": true,
+                            "form": {
+                                "placeholder": "Enter a email",
+                                "tooltip": "Please Enter a unique emailId"
+                            },
+                            "displayToUser": true
+                        }
+                    },
+                    "name": {
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        },
+                        "frontEnd": {
+                            "type": "String",
+                            "required": [
+                                true,
+                                "Please Enter a name"
+                            ],
+                            "form": {
+                                "placeholder": "Enter name",
+                                "tooltip": "Please Enter a name"
+                            },
+                            "displayToUser": true
+                        }
+                    }
+                }
+            ]
         }
     },
     "endpoints": [
@@ -14,6 +186,91 @@
                     "path": "/",
                     "methods": {
                         "get": {}
+                    }
+                }
+            ]
+        },
+        {
+            "base": "/v1/uploads",
+            "routes": [
+                {
+                    "path": "/videos",
+                    "methods": {
+                        "post": [
+                            {
+                                "use": "apiReqForm"
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "base": "/v1/userss",
+            "routes": [
+                {
+                    "path": "",
+                    "methods": {
+                        "get": [
+                            {
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "get",
+                                        "modelName": "users"
+                                    }
+                                }
+                            }
+                        ],
+                        "post": [
+                            {
+                                "use": "apiReqBody",
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "upsert",
+                                        "modelName": "users",
+                                        "query": "user_id",
+                                        "use": "user_id"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "path": "/:id",
+                    "methods": {
+                        "get": [
+                            {
+                                "use": "apiReqParams",
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "get",
+                                        "modelName": "users",
+                                        "query": "user_id"
+                                    }
+                                }
+                            },
+                            {
+                                "condition": "isDataPresent",
+                                "message": "No user exist"
+                            }
+                        ],
+                        "delete": [
+                            {
+                                "use": "apiReqParams",
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "delete",
+                                        "modelName": "users",
+                                        "query": "user_id"
+                                    }
+                                }
+                            }
+                        ]
                     }
                 }
             ]

@@ -1,6 +1,6 @@
 'use strict';
 
-const mongoDB = require('./mongodb');
+const mongoDB = require('../../../../database/mongo/dbGenerator');
 
 
 module.exports = {
