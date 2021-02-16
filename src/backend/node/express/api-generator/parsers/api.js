@@ -1,14 +1,18 @@
 'use strict';
 const _ = require('underscore');
 const __ = require('lodash');
-const mongoDB = require('../database/mongodb/mongodb');
+const mongoDB = require('../../../database/mongo/dbGenerator');
 const mongoParser = require('./mongo');
 const functionUtils = require('../functionStore');
 const validMethods = ['get', 'post', 'patch', 'delete'];
+const multer = require('multer');
 
 // Responsible to return data which will be used in further function operations
 const returnDataForOperations = (type = '', reqData, currentData) => {
     switch(type){
+        case 'apiReqForm':
+            console.log(reqData.files);
+            return {media: reqData.files, ...reqData.body};
         case 'apiReqBody':
             return reqData.body;
         case 'apiReqQuery':
@@ -83,6 +87,7 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
             }
         }
     };
+    result = customFunctionObject['removeObjectKeys'](result, ['media']);
     return result;
 };
 
@@ -91,18 +96,40 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
  * and uses the express app provided to it, path of endpoint and customFunctionObject which has generic and custom function
  */
 const generateEndpoint = (apps, methodKey, base, path, tasks, customFunctionObject) => {
-    return apps[methodKey](base+path, async(req, res) => {
-        try{
-            let data = null;
-            if(tasks && tasks.length > 0){
-                data = await performOperations(methodKey, tasks, req, customFunctionObject);
+    const upload = multer({fileSize: 20971520});
+    const mediaFields = [
+        {name: 'images', maxCount: 2},
+        {name: 'videos', maxCount: 2},
+        {name: 'others', maxCount: 2}
+    ];
+    if(methodKey === 'post'){
+
+        return apps[methodKey](base+path, upload.fields(mediaFields), async(req, res) => {
+            try{
+                let data = null;
+                if(tasks && tasks.length > 0){
+                    data = await performOperations(methodKey, tasks, req, customFunctionObject);
+                }
+                res.status(200).json({success: true, data});
+            }catch(err){
+                console.log({[base+path]: err});
+                res.status(500).json({success: false, message: err});
             }
-            res.status(200).json({success: true, data});
-        }catch(err){
-            console.log({[base+path]: err});
-            res.status(500).json({success: false, message: err});
-        }
-    });
+        });
+    }else{
+        return apps[methodKey](base+path, async(req, res) => {
+            try{
+                let data = null;
+                if(tasks && tasks.length > 0){
+                    data = await performOperations(methodKey, tasks, req, customFunctionObject);
+                }
+                res.status(200).json({success: true, data});
+            }catch(err){
+                console.log({[base+path]: err});
+                res.status(500).json({success: false, message: err});
+            }
+        });
+    }
 }
 
 /**
@@ -111,8 +138,8 @@ const generateEndpoint = (apps, methodKey, base, path, tasks, customFunctionObje
  */
 const routeMapper = (jsonData, apps, customObject) => {
     if(!_.isEmpty(jsonData.db) && jsonData.db.mongo && !_.isEmpty(jsonData.db.mongo)){
-        jsonData.db.mongo.models = customObject[jsonData.db.mongo.models];
-        mongoDB.initialize(jsonData.db.mongo);
+        // jsonData.db.mongo.models = customObject[jsonData.db.mongo.models];
+        mongoDB.initialize(jsonData.db);
     }else{
         console.log('No mongo service');
     }
