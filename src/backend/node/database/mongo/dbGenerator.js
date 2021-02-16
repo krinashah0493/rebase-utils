@@ -30,7 +30,7 @@ const initialize = async (jsonBody) => {
           useCreateIndex: true,
         }
       );
-      const collections = [parser(jsonBody.mongo.models)];
+      const collections = parser(jsonBody.mongo.models, 'BackEnd');
       console.log(collections);
       collections.forEach((collection) => {
         if (collection.collection_name) {

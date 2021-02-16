@@ -15,7 +15,12 @@
                     "user_name": {
                         "frontEnd": {
                             "type": "String",
-                            "required": true
+                            "required": true,
+                            "key": "userName",
+                            "label": "User name",
+                            "placeholder": "Enter a user name",
+                            "tooltip": "Please Enter a unique user name",
+                            "widget": "input"
                         },
                         "backEnd": {
                             "required": true,
@@ -24,11 +29,16 @@
                     },
                     "phone_number": {
                         "frontEnd": {
-                            "type": "String",
-                            "required": true
+                            "type": "Number",
+                            "key": "phoneNumber",
+                            "label": "Phone number",
+                            "placeholder": "Enter phone number",
+                            "tooltip": "Please enter a phone number",
+                            "required": true,
+                            "widget": "number"
                         },
                         "backEnd": {
-                            "type": "String",
+                            "type": "Number",
                             "required": true
                         }
                     },
@@ -60,7 +70,12 @@
                     "company_name": {
                         "frontEnd": {
                             "type": "String",
-                            "required": true
+                            "key": "companyName",
+                            "label": "Company Name",
+                            "placeholder": "Enter company name",
+                            "tooltip": "Company name mandatory",
+                            "required": true,
+                            "widget": "input"
                         },
                         "backEnd": {
                             "type": "String",
@@ -70,7 +85,12 @@
                     "user_country": {
                         "frontEnd": {
                             "type": "String",
-                            "required": true
+                            "key": "country",
+                            "label": "Country",
+                            "placeholder": "Select country",
+                            "tooltip": "Please select country",
+                            "required": true,
+                            "widget": "select"
                         },
                         "backEnd": {
                             "type": "String",
@@ -80,7 +100,12 @@
                     "user_currency_code": {
                         "frontEnd": {
                             "type": "String",
-                            "required": true
+                            "key": "currencyCode",
+                            "label": "Currency code",
+                            "placeholder": "Enter currency code",
+                            "tooltip": "Please enter currency code",
+                            "required": true,
+                            "widget": "select"
                         },
                         "backEnd": {
                             "type": "String",
@@ -90,7 +115,12 @@
                     "address_line1": {
                         "frontEnd": {
                             "type": "String",
-                            "required": true
+                            "key": "addressLine1",
+                            "label": "Address line 1",
+                            "placeholder": "Enter your address",
+                            "tooltip": "Address is mandatory",
+                            "required": true,
+                            "widget": "textarea"
                         },
                         "backEnd": {
                             "type": "String",
@@ -100,7 +130,11 @@
                     "address_line2": {
                         "frontEnd": {
                             "type": "String",
-                            "required": false
+                            "key": "addressLine2",
+                            "label": "Address line 2",
+                            "placeholder": "Enter address",
+                            "required": false,
+                            "widget": "textarea"
                         },
                         "backEnd": {
                             "type": "String",
@@ -125,10 +159,11 @@
                                 true,
                                 "Please enter a value"
                             ],
-                            "form": {
-                                "placeholder": "Enter password",
-                                "tooltip": "Please Enter a password"
-                            }
+                            "key": "password",
+                            "label": "Password",
+                            "placeholder": "Enter password",
+                            "tooltip": "Please Enter a password",
+                            "widget": "password"
                         },
                         "backEnd": {
                             "type": "String",
@@ -149,11 +184,12 @@
                             "type": "String",
                             "required": true,
                             "unique": true,
-                            "form": {
-                                "placeholder": "Enter a email",
-                                "tooltip": "Please Enter a unique emailId"
-                            },
-                            "displayToUser": true
+                            "key": "email",
+                            "label": "Email",
+                            "placeholder": "Enter a email",
+                            "tooltip": "Please Enter a unique emailId",
+                            "displayToUser": true,
+                            "widget": "input"
                         }
                     },
                     "name": {
@@ -167,14 +203,16 @@
                                 true,
                                 "Please Enter a name"
                             ],
-                            "form": {
-                                "placeholder": "Enter name",
-                                "tooltip": "Please Enter a name"
-                            },
-                            "displayToUser": true
+                            "key": "name",
+                            "label": "Name",
+                            "placeholder": "Enter name",
+                            "tooltip": "Please Enter a name",
+                            "displayToUser": true,
+                            "widget": "input"
                         }
                     }
-                }
+                },
+                {}
             ]
         }
     },
