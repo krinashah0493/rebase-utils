@@ -2,6 +2,7 @@
 const _ = require('underscore');
 const __ = require('lodash');
 const mongoDB = require('../../../database/mongo/dbGenerator');
+const mongoDBParser = require('../../../database/mongo/parser');
 const mongoParser = require('./mongo');
 const functionUtils = require('../functionStore');
 const validMethods = ['get', 'post', 'patch', 'delete'];
@@ -143,6 +144,10 @@ const routeMapper = (jsonData, apps, customObject) => {
     }else{
         console.log('No mongo service');
     }
+    apps.get('/models', (req, res) => {
+        const frontEndModels = mongoDBParser(jsonData.db.mongo.models, 'FrontEnd');
+        res.status(200).json({success: true, data: frontEndModels});
+    });
     jsonData.endpoints.map(apiObj => {
         const {
             base,

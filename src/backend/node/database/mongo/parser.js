@@ -31,8 +31,8 @@ const parser = (data, type) => {
       Object.keys(data[i]).forEach(element=>{
         console.log(_.size(data[i]))
         if(data[i][element].frontEnd){
-          if(data[i][element].frontEnd.form){
-            NewFrontEndCollection.push(data[i][element].frontEnd.form)
+          if(data[i][element].frontEnd){
+            NewFrontEndCollection.push(data[i][element].frontEnd)
           }
         }
       })
