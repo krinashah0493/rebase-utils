@@ -14,7 +14,7 @@ const performMongoAction = async (dbValue) => {
                 return getResult;
                 
             case 'upsert':
-                // console.log('DB mongo upsert: ', dbValue);
+                console.log('DB mongo upsert: ', dbValue);
                 const upsertResult = await dbUtil.upsertDatabase(dbValue.modelName, dbValue.data.id || null, dbValue.data.value, dbValue.query || null);
                 return upsertResult;
             

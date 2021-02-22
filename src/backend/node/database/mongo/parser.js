@@ -1,20 +1,22 @@
 const _ =require("underscore")
 
 const parser = (data, type) => {
-  const backEndCollection = {};
+  const backEndCollection = [];
+  console.log(data);
   if (type === "BackEnd") {
     data.forEach((collection) => {
-      for (let [key, value] of Object.entries(collection)) {
-        if (value.backEnd) {
-          backEndCollection[key] = value.backEnd;
-        } else if (!value.backEnd) {
-          backEndCollection[key] = value;
-        } else {
-          return false;
+      let obj = {};
+      _.each(collection, (value, key) => {
+        if(key !== 'collection_name'){
+          obj[key] = value.backEnd;
+        }else if(key === 'collection_name'){
+          obj.collection_name = value;
         }
-      }
+      });
+      backEndCollection.push(obj);
     });
-    return [backEndCollection];
+    // console.log(backEndCollection);
+    return backEndCollection;
   } else if (type === "FrontEnd") {
     let frontEndData=[]
     let NewFrontEndCollection = [];
@@ -29,7 +31,6 @@ const parser = (data, type) => {
         index+=1
       }
       Object.keys(data[i]).forEach(element=>{
-        console.log(_.size(data[i]))
         if(data[i][element].frontEnd){
           if(data[i][element].frontEnd){
             NewFrontEndCollection.push(data[i][element].frontEnd)

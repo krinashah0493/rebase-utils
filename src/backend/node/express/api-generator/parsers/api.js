@@ -6,14 +6,13 @@ const mongoDBParser = require('../../../database/mongo/parser');
 const mongoParser = require('./mongo');
 const functionUtils = require('../functionStore');
 const validMethods = ['get', 'post', 'patch', 'delete'];
-const multer = require('multer');
+const uploadFiles = require('../file-upload');
 
 // Responsible to return data which will be used in further function operations
 const returnDataForOperations = (type = '', reqData, currentData) => {
     switch(type){
         case 'apiReqForm':
-            console.log(reqData.files);
-            return {media: reqData.files, ...reqData.body};
+            return reqData;
         case 'apiReqBody':
             return reqData.body;
         case 'apiReqQuery':
@@ -29,7 +28,9 @@ const returnDataForOperations = (type = '', reqData, currentData) => {
 const returnUserActionResult = (type, data, customFunctionObject) => {
     const inputData = data.action.customFunction ? data.resultObj : data;
     const keyType = data.action.customFunction ? data.action.customFunction : type;
-    return customFunctionObject[keyType](inputData);
+    
+        return customFunctionObject[keyType](inputData);
+    
 }
 
 /**
@@ -47,9 +48,16 @@ const executeUserActions = async (actions, result, customFunctionObject) => {
             action.saveAt && await customFunctionObject['updateData'](action.saveAt, result, parallelOperationsResult[j]);
         }
     }else if(actions && !_.isEmpty(actions)){
-        const value = await returnUserActionResult(actions.operation, {resultObj: result, action: actions}, customFunctionObject);
+        let value = await returnUserActionResult(actions.operation, {resultObj: result, action: actions}, customFunctionObject);
         actions.modify && customFunctionObject['updateData'](actions.modify, result, value);
         actions.saveAt && customFunctionObject['updateData'](actions.saveAt, result, value);
+        if(actions.operation === 'uploadFiles'){
+            value = {
+                ...value.body,
+                ...(actions.saveAt && {[actions.saveAt]: result[actions.saveAt][actions.fileType]}),
+                ...(actions.modify && {[actions.modify]: result[actions.modify][actions.fileType]}),
+            }
+        }
         return value;
     }else{
         return result;
@@ -78,7 +86,7 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
         if('condition' in tasks[i] && !(customFunctionObject[tasks[i].condition](result))){
             return tasks[i].message || result;
         }else{
-            if(methodKey === 'get'){
+            if(methodKey === 'get' || actions.operation === 'uploadFiles'){
                 result = await executeUserActions(actions, result, customFunctionObject);
             }else{
                 await executeUserActions(actions, result, customFunctionObject);
@@ -88,7 +96,6 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
             }
         }
     };
-    result = customFunctionObject['removeObjectKeys'](result, ['media']);
     return result;
 };
 
@@ -97,15 +104,8 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
  * and uses the express app provided to it, path of endpoint and customFunctionObject which has generic and custom function
  */
 const generateEndpoint = (apps, methodKey, base, path, tasks, customFunctionObject) => {
-    const upload = multer({fileSize: 20971520});
-    const mediaFields = [
-        {name: 'images', maxCount: 2},
-        {name: 'videos', maxCount: 2},
-        {name: 'others', maxCount: 2}
-    ];
     if(methodKey === 'post'){
-
-        return apps[methodKey](base+path, upload.fields(mediaFields), async(req, res) => {
+        return apps[methodKey](base+path, async(req, res) => {
             try{
                 let data = null;
                 if(tasks && tasks.length > 0){
@@ -138,6 +138,7 @@ const generateEndpoint = (apps, methodKey, base, path, tasks, customFunctionObje
  * for further operations and it maps over to the methods and checks if its valid method name or not.
  */
 const routeMapper = (jsonData, apps, customObject) => {
+    // apps.use('/v1/uploadss', saveFile);
     if(!_.isEmpty(jsonData.db) && jsonData.db.mongo && !_.isEmpty(jsonData.db.mongo)){
         // jsonData.db.mongo.models = customObject[jsonData.db.mongo.models];
         mongoDB.initialize(jsonData.db);
@@ -146,14 +147,22 @@ const routeMapper = (jsonData, apps, customObject) => {
     }
     apps.get('/models', (req, res) => {
         const frontEndModels = mongoDBParser(jsonData.db.mongo.models, 'FrontEnd');
-        res.status(200).json({success: true, data: frontEndModels});
+        res.status(200).json({success: true, data: frontEndModels})
+    });
+    
+    apps.post('/v1/uploadss', function(req, res) {
+        uploadFiles(req, {})
+        .then(resData => {
+            res.status(200).json(resData);
+        })
+        .catch(err => res.status(403).json(err));
     });
     jsonData.endpoints.map(apiObj => {
         const {
             base,
             routes,
         } = apiObj;
-        const functionsObj = {...functionUtils, ...customObject, mongo: mongoParser.mongoWrapperFunction};
+        const functionsObj = {...functionUtils, ...customObject, mongo: mongoParser.mongoWrapperFunction, uploadFiles};
         routes.map(route => {
             const { path, methods } = route;
             _.map(methods, (method, methodKey) => {
