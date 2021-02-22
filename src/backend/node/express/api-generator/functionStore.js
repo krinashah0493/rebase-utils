@@ -1,5 +1,6 @@
 const moment = require('moment');
 const __ = require('lodash');
+const fs = require('fs');
 
 // Uses moment unix timestamp to generate id
 const generateId = () => {
@@ -37,6 +38,21 @@ const removeObjectKeys = (dataObj, keys) => {
 // Responsible to check whether provided value is object or not
 const isObject = (val) => val && val.constructor && val.constructor.name === 'Object';
 
+
+const removeFile = function (filePath) {
+  try {
+    fs.unlinkSync(filePath);
+    console.log('File"' + filePath + '" removed!');     
+  } catch (err) {
+    console.log('File error: ', err);
+  }
+};
+
+// Convert image to base64
+const imgToBase64 = (path) => {
+    return fs.readFileSync(path, 'base64');
+};
+
 module.exports = {
     generateId,
     getSubString,
@@ -44,4 +60,6 @@ module.exports = {
     updateData,
     removeObjectKeys,
     isObject,
+    removeFile,
+    imgToBase64,
 };

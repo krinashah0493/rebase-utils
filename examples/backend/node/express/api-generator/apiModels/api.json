@@ -5,6 +5,20 @@
             "name": "cimDB",
             "models": [
                 {
+                    "collection_name": "medias",
+                    "id": {
+                        "backEnd": {
+                            "type": "String",
+                            "required": true
+                        }
+                    },
+                    "images": {
+                        "backEnd": {
+                            "type": "Array"
+                        }
+                    }
+                },
+                {
                     "collection_name": "users",
                     "user_id": {
                         "backEnd": {
@@ -211,8 +225,7 @@
                             "widget": "input"
                         }
                     }
-                },
-                {}
+                }
             ]
         }
     },
@@ -232,11 +245,27 @@
             "base": "/v1/uploads",
             "routes": [
                 {
-                    "path": "/videos",
+                    "path": "",
                     "methods": {
                         "post": [
                             {
-                                "use": "apiReqForm"
+                                "use": "apiReqForm",
+                                "actions": {
+                                    "operation": "uploadFiles",
+                                    "fileType": "images",
+                                    "saveAt": "images"
+                                }
+                            },
+                            {
+                                "actions": {
+                                    "operation": "mongo",
+                                    "values": {
+                                        "type": "upsert",
+                                        "modelName": "medias",
+                                        "query": "id",
+                                        "use": "id"
+                                    }
+                                }
                             }
                         ]
                     }
