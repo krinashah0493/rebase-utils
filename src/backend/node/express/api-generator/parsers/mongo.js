@@ -8,7 +8,7 @@ const performMongoAction = async (dbValue) => {
     try{
         switch(dbValue.type){
             case 'get':
-                // console.log('DB mongo get: ', dbValue);
+                console.log('DB mongo get: ', dbValue);
                 const getResult = await dbUtil.getAllByFilter(dbValue.modelName, dbValue.query || {});
                 console.log(getResult);
                 return getResult;
@@ -19,7 +19,7 @@ const performMongoAction = async (dbValue) => {
                 return upsertResult;
             
             case 'delete':
-                // console.log('DB mongo delete: ', dbValue);
+                console.log('DB mongo delete: ', dbValue);
                 const deleteResult = await dbUtil.removeById(dbValue.modelName, dbValue.query);
                 return 'Deleted';
             default:

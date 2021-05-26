@@ -85,7 +85,7 @@ const performOperations = async (methodKey, tasks, reqData, customFunctionObject
         }
         if('condition' in tasks[i] && !(customFunctionObject[tasks[i].condition](result))){
             return tasks[i].message || result;
-        }else{
+        }else if(actions){
             if(methodKey === 'get' || actions.operation === 'uploadFiles'){
                 result = await executeUserActions(actions, result, customFunctionObject);
             }else{
